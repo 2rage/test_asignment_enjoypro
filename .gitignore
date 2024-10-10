@@ -1,0 +1,83 @@
+# Python specific files
+*.py[cod]
+*.pyo
+__pycache__/
+*.so
+
+# Django specific files
+*.log
+local_settings.py
+db.sqlite3
+/media
+/static
+/staticfiles
+
+# Virtual environments
+venv/
+env/
+ENV/
+.venv/
+.pyvenv/
+
+# Mac specific files
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# macOS system files that store folder attributes
+.Spotlight-V100
+.Trashes
+._*
+
+# Byte-compiled / optimized / DLL files
+*.py[cod]
+
+# C extensions
+*.so
+
+# Packages
+*.egg
+*.egg-info/
+dist/
+build/
+eggs/
+parts/
+var/
+sdist/
+develop-eggs/
+.installed.cfg
+*.egg-info/
+.eggs/
+
+# Installer logs
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Unit test / coverage reports
+htmlcov/
+.tox/
+.nox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+*.py,cover
+.hypothesis/
+
+# Django stuff:
+*.log
+local_settings.py
+db.sqlite3
+db.sqlite3-journal
+# Backup files
+*.bak
+
+# Pyre type checker
+.pyre/
+
+# mypy
+.mypy_cache/
+.dmypy.json
+dmypy.json
