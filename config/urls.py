@@ -7,7 +7,7 @@ from quiz import views
 urlpatterns = [
     path('', lambda request: redirect('login', permanent=False)),
 
-    path('adminmain/', admin.site.urls),
+    path('admin/', admin.site.urls),
 
     # Кастомная админка
     path('admin-panel/', views.admin_panel, name='admin_panel'),
