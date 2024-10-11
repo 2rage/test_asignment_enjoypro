@@ -1,3 +1,4 @@
+import uuid
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth import login
@@ -35,9 +36,13 @@ def quiz_page(request):
 
 @login_required
 def question_list(request):
+    if "quiz_id" not in request.session:
+        request.session["quiz_id"] = str(uuid.uuid4())
+
     questions = Question.objects.all()
     answered_questions = request.session.get("answered_questions", [])
-    all_answered = len(answered_questions) == questions.count()
+    all_answered = all(question.pk in answered_questions for question in questions)
+
     return render(
         request,
         "question_list.html",
@@ -52,50 +57,48 @@ def question_list(request):
 @login_required
 def question_detail(request, pk):
     question = get_object_or_404(Question, pk=pk)
+
+    if "quiz_id" not in request.session:
+        request.session["quiz_id"] = str(uuid.uuid4())
+
     if request.method == "POST":
         selected_answer_id = request.POST.get("answer")
-        if not selected_answer_id:
-            return render(
-                request,
-                "question_detail.html",
-                {"question": question, "error": "Please select an answer."},
-            )
-
-        try:
+        if selected_answer_id:
             selected_answer = Answer.objects.get(id=selected_answer_id)
-        except Answer.DoesNotExist:
-            return render(
-                request,
-                "question_detail.html",
-                {"question": question, "error": "Answer does not exist."},
-            )
 
-        is_correct = selected_answer.is_correct
-        UserAnswer.objects.create(
-            user=request.user,
-            question=question,
-            answer=selected_answer,
-            is_correct=is_correct,
-        )
-        answered_questions = request.session.get("answered_questions", [])
-        if pk not in answered_questions:
-            answered_questions.append(pk)
-            request.session["answered_questions"] = answered_questions
+            is_correct = selected_answer.is_correct
 
-        return redirect("question_list")
+            answered_questions = request.session.get("answered_questions", [])
+            if pk not in answered_questions:
+                UserAnswer.objects.create(
+                    user=request.user,
+                    question=question,
+                    answer=selected_answer,
+                    is_correct=is_correct,
+                    quiz_id=request.session["quiz_id"],
+                )
+                answered_questions.append(pk)
+                request.session["answered_questions"] = answered_questions
+
+            return redirect("question_list")
 
     return render(request, "question_detail.html", {"question": question})
-
 
 @login_required
 def quiz_results(request):
     total_questions = Question.objects.count()
-    score = request.session.get("score", 0)
+
+    quiz_id = request.session.get("quiz_id")
+    correct_answers = UserAnswer.objects.filter(
+        user=request.user, quiz_id=quiz_id, is_correct=True
+    ).count()
+
     request.session.flush()
+
     return render(
         request,
         "quiz_results.html",
-        {"total_questions": total_questions, "score": score},
+        {"total_questions": total_questions, "score": correct_answers},
     )
 
 

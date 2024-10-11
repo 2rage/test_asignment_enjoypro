@@ -25,3 +25,4 @@ class UserAnswer(models.Model):
     question = models.ForeignKey(Question, on_delete=models.CASCADE)
     answer = models.ForeignKey(Answer, on_delete=models.CASCADE)
     is_correct = models.BooleanField()
+    quiz_id = models.CharField(max_length=36, null=True, blank=True)
