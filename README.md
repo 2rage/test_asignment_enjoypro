@@ -44,10 +44,10 @@ docker-compose up --build
 
 ## Примеры работы приложения
 
-<img src="/misc/images/image.png" width="450">
-<img src="/misc/images/image2.png" width="450">
-<img src="/misc/images/image3.png" width="450">
-<img src="/misc/images/image4.png" width="450">
-<img src="/misc/images/image5.png" width="450">
-<img src="/misc/images/image6.png" width="450">
-<img src="/misc/images/image7.png" width="450">
+<img src="/misc/images/image.png" width="550">
+<img src="/misc/images/image2.png" width="550">
+<img src="/misc/images/image3.png" width="550">
+<img src="/misc/images/image4.png" width="550">
+<img src="/misc/images/image5.png" width="550">
+<img src="/misc/images/image6.png" width="550">
+<img src="/misc/images/image7.png" width="550">
