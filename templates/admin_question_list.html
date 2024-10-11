@@ -1,22 +1,14 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <title>Список вопросов</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/css/bootstrap.min.css" rel="stylesheet">
-</head>
-<body>
-    <div class="container mt-5">
-        <h1 class="text-center">Список вопросов</h1>
-        <ul class="list-group">
-            {% for question in questions %}
-                <li class="list-group-item">
-                    <a href="{% url 'edit_question' question.pk %}">{{ question.text }}</a> 
-                </li>
-            {% endfor %}
-        </ul>
-    </div>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js"></script>
-</body>
-</html>
+{% extends 'base.html' %}
+
+{% block title %}Список вопросов{% endblock %}
+
+{% block content %}
+    <h1 class="text-center">Список вопросов</h1>
+    <ul class="list-group">
+        {% for question in questions %}
+            <li class="list-group-item">
+                <a href="{% url 'edit_question' question.pk %}">{{ question.text }}</a> 
+            </li>
+        {% endfor %}
+    </ul>
+{% endblock %}

@@ -8,6 +8,7 @@ from .forms import UserCreationForm, QuestionForm, AnswerForm
 from .models import Question, Answer, UserAnswer
 from django.contrib.auth.decorators import user_passes_test
 
+
 class LoginView(View):
     def get(self, request):
         form = AuthenticationForm()
@@ -18,114 +19,145 @@ class LoginView(View):
         if form.is_valid():
             user = form.get_user()
             login(request, user)
-            return redirect("quiz_page")
+
+            if user.is_superuser:
+                return redirect("admin_panel")
+            else:
+                return redirect("question_list")
+
         return render(request, "login.html", {"form": form})
+
 
 @login_required
 def quiz_page(request):
     return render(request, "quiz_page.html")
 
+
 @login_required
 def question_list(request):
     questions = Question.objects.all()
-    answered_questions = request.session.get('answered_questions', [])
+    answered_questions = request.session.get("answered_questions", [])
     all_answered = len(answered_questions) == questions.count()
-    return render(request, 'question_list.html', {
-        'questions': questions,
-        'answered_questions': answered_questions,
-        'all_answered': all_answered
-    })
+    return render(
+        request,
+        "question_list.html",
+        {
+            "questions": questions,
+            "answered_questions": answered_questions,
+            "all_answered": all_answered,
+        },
+    )
+
 
 @login_required
 def question_detail(request, pk):
     question = get_object_or_404(Question, pk=pk)
-    if request.method == 'POST':
-        selected_answer_id = request.POST.get('answer')
+    if request.method == "POST":
+        selected_answer_id = request.POST.get("answer")
         if not selected_answer_id:
-            return render(request, 'question_detail.html', {'question': question, 'error': 'Please select an answer.'})
+            return render(
+                request,
+                "question_detail.html",
+                {"question": question, "error": "Please select an answer."},
+            )
 
         try:
             selected_answer = Answer.objects.get(id=selected_answer_id)
         except Answer.DoesNotExist:
-            return render(request, 'question_detail.html', {'question': question, 'error': 'Answer does not exist.'})
+            return render(
+                request,
+                "question_detail.html",
+                {"question": question, "error": "Answer does not exist."},
+            )
 
         is_correct = selected_answer.is_correct
         UserAnswer.objects.create(
             user=request.user,
             question=question,
             answer=selected_answer,
-            is_correct=is_correct
+            is_correct=is_correct,
         )
-        answered_questions = request.session.get('answered_questions', [])
+        answered_questions = request.session.get("answered_questions", [])
         if pk not in answered_questions:
             answered_questions.append(pk)
-            request.session['answered_questions'] = answered_questions
+            request.session["answered_questions"] = answered_questions
 
-        return redirect('question_list')
+        return redirect("question_list")
 
-    return render(request, 'question_detail.html', {'question': question})
+    return render(request, "question_detail.html", {"question": question})
+
 
 @login_required
 def quiz_results(request):
     total_questions = Question.objects.count()
-    score = request.session.get('score', 0)
+    score = request.session.get("score", 0)
     request.session.flush()
-    return render(request, 'quiz_results.html', {'total_questions': total_questions, 'score': score})
+    return render(
+        request,
+        "quiz_results.html",
+        {"total_questions": total_questions, "score": score},
+    )
+
 
 def admin_required(view_func):
     decorated_view_func = user_passes_test(
-        lambda user: user.is_superuser,
-        login_url='/login/'
+        lambda user: user.is_superuser, login_url="/login/"
     )(view_func)
     return decorated_view_func
+
 
 @admin_required
 def admin_panel(request):
     questions = Question.objects.all()
-    return render(request, 'admin_panel.html', {'questions': questions})
+    return render(request, "admin_panel.html", {"questions": questions})
+
 
 @admin_required
 def create_user(request):
-    if request.method == 'POST':
+    if request.method == "POST":
         form = UserCreationForm(request.POST)
         if form.is_valid():
             form.save()
-            return redirect('admin_panel')
+            return redirect("admin_panel")
     else:
         form = UserCreationForm()
-    
-    return render(request, 'create_user.html', {'form': form})
+
+    return render(request, "create_user.html", {"form": form})
+
 
 @admin_required
 def admin_question_list(request):
     questions = Question.objects.all()
-    return render(request, 'admin_question_list.html', {'questions': questions})
+    return render(request, "admin_question_list.html", {"questions": questions})
+
 
 @admin_required
 def edit_question(request, pk):
     question = get_object_or_404(Question, pk=pk)
-    if request.method == 'POST':
+    if request.method == "POST":
         form = QuestionForm(request.POST, instance=question)
         if form.is_valid():
             form.save()
-            return redirect('admin_panel')
+            return redirect("admin_panel")
     else:
         form = QuestionForm(instance=question)
 
-    return render(request, 'edit_question.html', {'form': form, 'question': question})
+    return render(request, "edit_question.html", {"form": form, "question": question})
+
 
 @admin_required
 def edit_answer(request, question_pk, answer_pk):
     answer = get_object_or_404(Answer, pk=answer_pk, question__pk=question_pk)
-    if request.method == 'POST':
+    if request.method == "POST":
         form = AnswerForm(request.POST, instance=answer)
         if form.is_valid():
             form.save()
-            return redirect('edit_question', pk=question_pk)
+            return redirect("edit_question", pk=question_pk)
     else:
         form = AnswerForm(instance=answer)
-    
-    return render(request, 'edit_answer.html', {'form': form, 'answer': answer})
+
+    return render(request, "edit_answer.html", {"form": form, "answer": answer})
+
 
 @admin_required
 def user_statistics(request):
@@ -138,11 +170,13 @@ def user_statistics(request):
             correct_percentage = round((correct_answers / total_answers) * 100, 2)
         else:
             correct_percentage = 0
-        statistics.append({
-            'user': user,
-            'total_answers': total_answers,
-            'correct_answers': correct_answers,
-            'correct_percentage': correct_percentage
-        })
-    
-    return render(request, 'user_statistics.html', {'statistics': statistics})
+        statistics.append(
+            {
+                "user": user,
+                "total_answers": total_answers,
+                "correct_answers": correct_answers,
+                "correct_percentage": correct_percentage,
+            }
+        )
+
+    return render(request, "user_statistics.html", {"statistics": statistics})
